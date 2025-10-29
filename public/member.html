@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastro de Alunos</title>
+</head>
+<body>
+  <h1>Cadastro de Alunos</h1>
+  <form id="memberForm">
+    <input type="text" name="name" placeholder="Nome" required><br>
+    <input type="email" name="email" placeholder="Email" required><br>
+    <input type="text" name="phone" placeholder="Telefone"><br>
+    <button type="submit">Cadastrar</button>
+  </form>
+
+  <h2>Lista de alunos</h2>
+  <ul id="memberList"></ul>
+
+  <script>
+    const form = document.getElementById('memberForm');
+    const list = document.getElementById('memberList');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form));
+      await fetch('/api/members', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+      form.reset();
+      loadMembers();
+    });
+
+    async function loadMembers() {
+      const res = await fetch('/api/members');
+      const members = await res.json();
+      list.innerHTML = members.map(m => `<li>${m.name} - ${m.email} - ${m.phone}</li>`).join('');
+    }
+
+    loadMembers();
+  </script>
+</body>
+</html>
