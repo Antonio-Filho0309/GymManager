@@ -14,31 +14,88 @@
   </form>
 
   <h2>Lista de alunos</h2>
-  <ul id="memberList"></ul>
+<ul id="memberList"></ul> 
 
-  <script>
-    const form = document.getElementById('memberForm');
-    const list = document.getElementById('memberList');
+<script>
+  const form = document.getElementById('memberForm');
+  const list = document.getElementById('memberList');
+  let editingId = null;
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(form));
-      await fetch('/api/members', {
-        method: 'POST',
+  // 🔹 Função para carregar todos os alunos
+  async function loadMembers() {
+    try {
+      const res = await fetch('/api/members');
+      if (!res.ok) throw new Error('Erro ao carregar alunos');
+      const members = await res.json();
+
+      if (members.length === 0) {
+        list.innerHTML = '<li>Nenhum aluno cadastrado.</li>';
+        return;
+      }
+
+      list.innerHTML = members.map(m => `
+        <li>
+          ${m.name} - ${m.email} - ${m.phone}
+          <button onclick="editMember(${m.id}, '${m.name}', '${m.email}', '${m.phone}')">Editar</button>
+          <button onclick="deleteMember(${m.id})">Excluir</button>
+        </li>
+      `).join('');
+    } catch (err) {
+      console.error('Erro ao carregar membros:', err);
+      list.innerHTML = '<li>Erro ao carregar lista de alunos.</li>';
+    }
+  }
+
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(form));
+
+    try {
+      const url = editingId ? `/api/members/${editingId}` : '/api/members';
+      const method = editingId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
       });
+
+      if (!res.ok) throw new Error('Erro ao salvar aluno');
+
+      editingId = null;
       form.reset();
-      loadMembers();
-    });
-
-    async function loadMembers() {
-      const res = await fetch('/api/members');
-      const members = await res.json();
-      list.innerHTML = members.map(m => `<li>${m.name} - ${m.email} - ${m.phone}</li>`).join('');
+      form.querySelector('button').textContent = 'Cadastrar';
+      await loadMembers();
+    } catch (err) {
+      alert('Erro ao salvar aluno.');
+      console.error(err);
     }
+  });
 
-    loadMembers();
-  </script>
+
+  async function deleteMember(id) {
+    if (!confirm('Tem certeza que deseja excluir este aluno?')) return;
+    try {
+      const res = await fetch(`/api/members/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Erro ao excluir aluno');
+      await loadMembers();
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao excluir aluno.');
+    }
+  }
+
+  function editMember(id, name, email, phone) {
+    form.name.value = name;
+    form.email.value = email;
+    form.phone.value = phone;
+    editingId = id;
+    form.querySelector('button').textContent = 'Salvar alterações';
+  }
+
+  document.addEventListener('DOMContentLoaded', loadMembers);
+</script>
+
 </body>
 </html>
