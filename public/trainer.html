@@ -60,6 +60,11 @@
                       <label for="specialty" class="labelInput">Especialidade</label>
                   </div>
                   <br><br>
+                  <div class="label-float">
+                      <input type="text" name="password" id="password" class="inputUser" placeholder=" " required>
+                      <label for="password" class="labelInput">Senha</label>
+                  </div>
+                  <br><br>
                   <br>
               </fieldset>
               <br><br>
@@ -87,7 +92,8 @@
     <tr>
       <th scope="col">#</th>
       <th scope="col">Nome</th>
-      <th scope="col">Espacialidae</th>
+      <th scope="col">Espacialidade</th>
+      <th scope="col">Senha</th>
       <th scope="col">...</th>
     </tr>
   </thead>
@@ -125,8 +131,9 @@
           <td>${t.id}</td>
           <td>${t.name}</td>
           <td>${t.specialty}</td>
+          <td>${t.password}</td>
           <td>
-            <button class="btn btn-sm btn-warning" onclick="editTrainer(${t.id}, '${t.name}', '${t.specialty}')">Editar</button>
+            <button class="btn btn-sm btn-warning" onclick="editTrainer(${t.id}, '${t.name}', '${t.specialty}','${t.password}')">Editar</button>
             <button class="btn btn-sm btn-danger" onclick="deleteTrainer(${t.id})">Excluir</button>
           </td>
         </tr>
@@ -185,12 +192,13 @@
     }
   }
 
-  function editTrainer(id, name, specialty) {
+  function editTrainer(id, name, specialty, password) {
     editingId = id;
     form.reset();
 
     document.getElementById('name').value = name;
     document.getElementById('specialty').value = specialty;
+    document.getElementById('password').value = password;
 
     form.querySelector('button').textContent = 'Salvar';
     abrirModal('vis-modal');
