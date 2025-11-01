@@ -1,0 +1,206 @@
+<!--HTML-->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aluno</title>
+    <!--links-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/estilo.css">
+    <link rel="stylesheet" href="../css/tabela.css">
+</head>
+<body>
+
+      <!--Cabeçalho-->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="lista">
+              <li class="nav-item">
+                <a class="nav-link"  href="index.html"> <img src="../img/home.png" alt="Início" width="20px" height="20px">   Início</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link"  href="member.html"> <img src="../img/user.png" alt="user.png" width="20px" height="20px">    Aluno</a>
+              </li>
+                            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="trainer.html"> <img src="../img/user.png" alt="Aluguel" width="20px" height="20px">    Professor</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link " href="class.html"><img src="../img/aula.png" alt="Livro" width="20px" height="20px">    Aula</a>
+              </li>
+              
+            </ul>
+            <a class="btn btn-outline-danger" href="../login" role="button">Sair</a>
+          </div>
+        </div>
+         
+      </nav>
+    <!--Fim do Cabeçalho-->
+    
+    <!--Modal-->
+    <!---Tela de cadastro-->
+    <div id="vis-modal" class="modal">
+      <br><br><br><br><br><br>
+      <div class="box">
+          <img src="../img/botao-x.png" alt="Fechar" id="btn-fechar" onclick="fecharModal('vis-modal')">
+          <br>
+          <form id="trainerForm">
+              <fieldset>
+                  <legend><b>Cadastro  do Professor</b></legend>
+                  <br>
+                  <div class="label-float">
+                      <input type="text" name="name" id="name" class="inputUser"  placeholder=" " required>
+                      <label for="nome" class="labelInput">Nome completo</label>
+                  </div>
+                  <br><br>
+                  <div class="label-float">
+                      <input type="text" name="specialty" id="specialty" class="inputUser" placeholder=" " required>
+                      <label for="specialty" class="labelInput">Especialidade</label>
+                  </div>
+                  <br><br>
+                  <br>
+              </fieldset>
+              <br><br>
+              <button type="submit" id="submit">Cadastrar</button>
+
+      
+          </form>
+      </div>
+  </div>
+   <!--Tela de cadastro-->
+      <!--fim do modal-->
+
+    <!--Corpo--->
+    <main>
+    <!---Cabeçalho-->
+      <div class="header-pag">
+        <h1 class="titulo-pag">Professor</h1> <a href="#" class="btn-new"  onclick="novoProfessor()">Criar Novo</a>
+      </div>
+      <hr>
+        <div class="container">
+
+<!-- Tabela -->
+<table class="table text-white table-bg mt-4">
+  <thead class="bg-primary">
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Nome</th>
+      <th scope="col">Espacialidae</th>
+      <th scope="col">...</th>
+    </tr>
+  </thead>
+  <tbody id="trainerList">
+  
+  </tbody>
+</table>    
+  
+
+<script src="../js/modal.js"></script>
+<script>
+  const form = document.getElementById('trainerForm');
+  const list = document.getElementById('trainerList');
+  let editingId = null;
+
+    function novoProfessor() {
+    editingId = null; 
+    form.reset(); 
+    abrirModal('vis-modal'); 
+  }
+  async function loadTrainers() {
+    try {
+      const res = await fetch('/api/trainers');
+      if (!res.ok) throw new Error('Erro ao carregar Professores');
+      
+      const trainers = await res.json();
+
+      if (trainers.length === 0) {
+         list.innerHTML = '<tr><td colspan="5">Nenhum Professor cadastrado.</td></tr>';
+        return;
+      }
+
+      list.innerHTML = trainers.map(t => `
+        <tr>
+          <td>${t.id}</td>
+          <td>${t.name}</td>
+          <td>${t.specialty}</td>
+          <td>
+            <button class="btn btn-sm btn-warning" onclick="editTrainer(${t.id}, '${t.name}', '${t.specialty}')">Editar</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteTrainer(${t.id})">Excluir</button>
+          </td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      console.error('Erro ao carregar membros:', err);
+       list.innerHTML = '<tr><td colspan="5">Erro ao carregar lista de alunos.</td></tr>';
+    }
+  }
+
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(form));
+
+    try {
+      const url = editingId ? `/api/trainers/${editingId}` : '/api/trainers';
+      const method = editingId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+
+      if (!res.ok) throw new Error('Erro ao salvar Professor');
+
+      if (editingId) {
+      window.alert("Professor atualizado com sucesso!");
+      } else {
+        window.alert("Professor criado com sucesso!");
+      }
+
+      editingId = null;
+      form.reset();
+      form.querySelector('button').textContent = 'Cadastrar';
+      await loadTrainers();
+      fecharModal('vis-modal');
+    } catch (err) {
+      alert('Erro ao salvar Professor.');
+      console.error(err);
+    }
+  });
+
+
+  async function deleteTrainer(id) {
+    if (!confirm('Tem certeza que deseja excluir este Professor?')) return;
+    try {
+      const res = await fetch(`/api/trainers/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Erro ao excluir Professor');
+      await loadTrainers();
+      window.alert("Professor excluído com sucesso!");
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao excluir Professor.');
+    }
+  }
+
+  function editTrainer(id, name, specialty) {
+    editingId = id;
+    form.reset();
+
+    document.getElementById('name').value = name;
+    document.getElementById('specialty').value = specialty;
+
+    form.querySelector('button').textContent = 'Salvar';
+    abrirModal('vis-modal');
+  }
+
+  document.addEventListener('DOMContentLoaded', loadTrainers);
+</script>
+
+</body>
+</html>
