@@ -6,7 +6,7 @@ const db = require('./src/db');
 
 const memberRoutes = require('./src/routes/memberRoutes');
 const trainerRoutes = require('./src/routes/trainerRouters');
-// const classRoutes = require('./src/routes/classRoutes'); trainerRoutes
+const classRoutes = require('./src/routes/classRoutes'); 
 
 
 
@@ -17,7 +17,7 @@ app.use(express.static('public'));
 
 app.use('/api/members', memberRoutes);
 app.use('/api/trainers', trainerRoutes);
-// app.use('/api/class', classRoutes);
+app.use('/api/classes', classRoutes);
 
 
 const PORT = 3000;
