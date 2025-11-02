@@ -4,7 +4,6 @@ const db = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// chave secreta (use variável de ambiente em produção)
 const SECRET = 'minha_chave_super_secreta';
 
 router.post('/login', (req, res) => {
@@ -17,7 +16,6 @@ router.post('/login', (req, res) => {
     const senhaCorreta = await bcrypt.compare(password, trainer.password);
     if (!senhaCorreta) return res.status(401).json({ error: 'Senha incorreta' });
 
-    // Gera token JWT
     const token = jwt.sign(
       { id: trainer.id, name: trainer.name },
       SECRET,

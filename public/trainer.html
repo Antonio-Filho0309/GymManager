@@ -32,7 +32,7 @@
               </li>
               
             </ul>
-            <a class="btn btn-outline-danger" href="../login" role="button">Sair</a>
+            <a class="btn btn-outline-danger" href="../public/index.html" role="button">Sair</a>
           </div>
         </div>
          
@@ -109,11 +109,13 @@
   const list = document.getElementById('trainerList');
   let editingId = null;
 
-    function novoProfessor() {
+  function novoProfessor() {
     editingId = null; 
     form.reset(); 
+    form.querySelector('button').textContent = 'Cadastrar';
     abrirModal('vis-modal'); 
   }
+
   async function loadTrainers() {
     try {
       const res = await fetch('/api/trainers');
@@ -123,7 +125,7 @@
 
       if (trainers.length === 0) {
          list.innerHTML = '<tr><td colspan="5">Nenhum Professor cadastrado.</td></tr>';
-        return;
+         return;
       }
 
       list.innerHTML = trainers.map(t => `
@@ -131,19 +133,18 @@
           <td>${t.id}</td>
           <td>${t.name}</td>
           <td>${t.specialty}</td>
-          <td>${t.password}</td>
+          <td>••••••</td>
           <td>
-            <button class="btn btn-sm btn-warning" onclick="editTrainer(${t.id}, '${t.name}', '${t.specialty}','${t.password}')">Editar</button>
+            <button class="btn btn-sm btn-warning" onclick="editTrainer(${t.id}, '${t.name}', '${t.specialty}', '${t.password}')">Editar</button>
             <button class="btn btn-sm btn-danger" onclick="deleteTrainer(${t.id})">Excluir</button>
           </td>
         </tr>
       `).join('');
     } catch (err) {
-      console.error('Erro ao carregar membros:', err);
-       list.innerHTML = '<tr><td colspan="5">Erro ao carregar lista de alunos.</td></tr>';
+      console.error('Erro ao carregar professores:', err);
+      list.innerHTML = '<tr><td colspan="5">Erro ao carregar lista de professores.</td></tr>';
     }
   }
-
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -161,12 +162,7 @@
 
       if (!res.ok) throw new Error('Erro ao salvar Professor');
 
-      if (editingId) {
-      window.alert("Professor atualizado com sucesso!");
-      } else {
-        window.alert("Professor criado com sucesso!");
-      }
-
+      window.alert(editingId ? "Professor atualizado com sucesso!" : "Professor criado com sucesso!");
       editingId = null;
       form.reset();
       form.querySelector('button').textContent = 'Cadastrar';
@@ -177,7 +173,6 @@
       console.error(err);
     }
   });
-
 
   async function deleteTrainer(id) {
     if (!confirm('Tem certeza que deseja excluir este Professor?')) return;
@@ -195,17 +190,16 @@
   function editTrainer(id, name, specialty, password) {
     editingId = id;
     form.reset();
-
     document.getElementById('name').value = name;
     document.getElementById('specialty').value = specialty;
     document.getElementById('password').value = password;
-
     form.querySelector('button').textContent = 'Salvar';
     abrirModal('vis-modal');
   }
 
   document.addEventListener('DOMContentLoaded', loadTrainers);
 </script>
+
 
 </body>
 </html>

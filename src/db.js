@@ -26,6 +26,14 @@ db.serialize(() => {
         }
     });
 
+        db.all("PRAGMA table_info(trainers)", (err, rows) => {
+        if (err) throw err;
+        const columnExists = rows.some(row => row.name === 'plain_password');
+        if (!columnExists) {
+            db.run(`ALTER TABLE trainers ADD COLUMN plain_password TEXT`);
+        }
+    });
+
 
     db.run(`CREATE TABLE IF NOT EXISTS classes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
